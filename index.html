@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Custom Mobile Bingo</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --primary-color: #4a90e2;
+      --selected-color: #2ee59d;
+      --selected-text: #0b4b32;
+      --text-color: #333333;
+      --border-color: #dddddd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: var(--primary-color);
+      margin-bottom: 4px;
+    }
+
+    p.subtitle {
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .bingo-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      width: 100%;
+      max-width: 450px;
+      aspect-ratio: 1 / 1;
+      background-color: var(--border-color);
+      padding: 6px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .square {
+      background-color: var(--card-bg);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      word-break: break-word;
+    }
+
+    .square:active {
+      transform: scale(0.96);
+    }
+
+    .square.marked {
+      background-color: var(--selected-color);
+      color: var(--selected-text);
+    }
+
+    .square.free-space {
+      background-color: #fff3c4;
+      color: #8a6d3b;
+    }
+
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+    }
+
+    button {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    button:active {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Party Bingo</h1>
+    <p class="subtitle">Tap a square to mark it off!</p>
+  </header>
+
+  <div class="bingo-grid" id="bingoCard"></div>
+
+  <div class="controls">
+    <button onclick="generateCard()">New Card</button>
+  </div>
+
+  <script>
+    // Customize your list of bingo items here (minimum 24 required for a 5x5 grid with FREE space)
+    const bingoItems = [
+      "Find someone with a pet",
+      "Drinks iced coffee in winter",
+      "Has a tattoo",
+      "Left-handed",
+      "Speaks 2+ languages",
+      "Born in another state/country",
+      "Has gone skydiving",
+      "Loves spicy food",
+      "Plays an instrument",
+      "Night owl",
+      "Early bird",
+      "Binge-watched a show this week",
+      "Has broken a bone",
+      "Does not drink coffee",
+      "Owns a plant",
+      "Has run a marathon",
+      "Enjoys camping",
+      "Can juggle",
+      "Has met a celebrity",
+      "Is an only child",
+      "Has a birthday this month",
+      "Loves horror movies",
+      "Wearing green",
+      "Has a food allergy",
+      "Sings karaoke"
+    ];
+
+    function shuffle(array) {
+      let currentIndex = array.length, randomIndex;
+      const arrCopy = [...array];
+
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [arrCopy[currentIndex], arrCopy[randomIndex]] = [arrCopy[randomIndex], arrCopy[currentIndex]];
+      }
+
+      return arrCopy;
+    }
+
+    function generateCard() {
+      const grid = document.getElementById("bingoCard");
+      grid.innerHTML = "";
+
+      const shuffled = shuffle(bingoItems);
+      let itemIndex = 0;
+
+      for (let i = 0; i < 25; i++) {
+        const square = document.createElement("div");
+        square.classList.add("square");
+
+        // Middle square (Index 12) is FREE SPACE
+        if (i === 12) {
+          square.innerText = "FREE SPACE";
+          square.classList.add("marked", "free-space");
+        } else {
+          square.innerText = shuffled[itemIndex];
+          itemIndex++;
+
+          square.addEventListener("click", () => {
+            square.classList.toggle("marked");
+          });
+        }
+
+        grid.appendChild(square);
+      }
+    }
+
+    // Initialize on load
+    window.onload = generateCard;
+  </script>
+</body>
+</html>
