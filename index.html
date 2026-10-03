@@ -124,11 +124,10 @@
   <div class="bingo-grid" id="bingoCard"></div>
 
   <div class="controls">
-    <button onclick="generateCard()">New Card</button>
+    <button onclick="confirmNewCard()">Reset / New Card</button>
   </div>
 
   <script>
-    // Customize your list of bingo items here (minimum 24 required for a 5x5 grid with FREE space)
     const bingoItems = [
       "Find someone with a pet",
       "Drinks iced coffee in winter",
@@ -170,36 +169,76 @@
       return arrCopy;
     }
 
-    function generateCard() {
-      const grid = document.getElementById("bingoCard");
-      grid.innerHTML = "";
-
+    function createNewBoardData() {
       const shuffled = shuffle(bingoItems);
+      const board = [];
       let itemIndex = 0;
 
       for (let i = 0; i < 25; i++) {
+        if (i === 12) {
+          board.push({ text: "FREE SPACE", marked: true, isFree: true });
+        } else {
+          board.push({ text: shuffled[itemIndex], marked: false, isFree: false });
+          itemIndex++;
+        }
+      }
+
+      localStorage.setItem("bingoCardState", JSON.stringify(board));
+      return board;
+    }
+
+    function renderCard() {
+      const grid = document.getElementById("bingoCard");
+      grid.innerHTML = "";
+
+      // Check if a card is already saved in browser memory
+      let boardData = JSON.parse(localStorage.getItem("bingoCardState"));
+
+      // If no card is saved, create a new one
+      if (!boardData) {
+        boardData = createNewBoardData();
+      }
+
+      boardData.forEach((item, index) => {
         const square = document.createElement("div");
         square.classList.add("square");
+        square.innerText = item.text;
 
-        // Middle square (Index 12) is FREE SPACE
-        if (i === 12) {
-          square.innerText = "FREE SPACE";
-          square.classList.add("marked", "free-space");
-        } else {
-          square.innerText = shuffled[itemIndex];
-          itemIndex++;
-
-          square.addEventListener("click", () => {
-            square.classList.toggle("marked");
-          });
+        if (item.isFree) {
+          square.classList.add("free-space");
         }
 
+        if (item.marked) {
+          square.classList.add("marked");
+        }
+
+        square.addEventListener("click", () => {
+          // Toggle marked state
+          item.marked = !item.marked;
+          
+          if (item.marked) {
+            square.classList.add("marked");
+          } else {
+            square.classList.remove("marked");
+          }
+
+          // Save updated progress immediately
+          localStorage.setItem("bingoCardState", JSON.stringify(boardData));
+        });
+
         grid.appendChild(square);
+      });
+    }
+
+    function confirmNewCard() {
+      if (confirm("Are you sure you want to generate a new card? Your current marked squares will be cleared.")) {
+        localStorage.removeItem("bingoCardState");
+        renderCard();
       }
     }
 
-    // Initialize on load
-    window.onload = generateCard;
+    // Load saved card or create new one on load
+    window.onload = renderCard;
   </script>
 </body>
 </html>
